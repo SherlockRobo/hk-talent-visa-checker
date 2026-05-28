@@ -3,8 +3,10 @@
 ## 核心链接
 
 - 本地工具：`/Users/bytedance/ObsidianVault_LOCAL/wiki/writing/tools/hk-talent-visa-checker/index.html`
+- Vercel 后台版：https://sherlockagent.vercel.app/articles/hk-talent-visa-checker/
 - 线上网页：https://sherlockrobo.github.io/hk-talent-visa-checker/
 - GitHub 仓库：https://github.com/SherlockRobo/hk-talent-visa-checker
+- 私有提交收件仓库：https://github.com/SherlockRobo/hk-talent-submissions
 
 ## 功能
 
@@ -13,6 +15,7 @@
 - 专才 GEP/ASMTP：按身份、香港 offer、岗位、薪酬、本地劳动力/便利措施判断。
 - 学校模糊匹配：内置官方合资格大学清单 200 所。
 - 记录保存：浏览器本地保存、载入、删除、导出 JSON。
+- 后台提交：Vercel API `/api/hk-talent-submit` 写入私有 GitHub 收件仓库。
 
 ## 规则口径
 
