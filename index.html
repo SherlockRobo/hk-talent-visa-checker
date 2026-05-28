@@ -238,7 +238,79 @@
       padding: 0 2px;
     }
 
+    .match-box {
+      border: 1px solid #d7e3e1;
+      background: #f9fcfb;
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 8px;
+      max-height: 230px;
+      overflow: auto;
+    }
+
+    .match-item,
+    .record-item {
+      border: 1px solid #dce8e6;
+      border-radius: 7px;
+      background: white;
+      padding: 10px 11px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .match-item button,
+    .record-actions button {
+      border: 1px solid var(--teal);
+      background: #eef6f4;
+      color: var(--teal-dark);
+      border-radius: 6px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .match-name,
+    .record-name {
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .match-meta,
+    .record-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+      line-height: 1.45;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 74px;
+      border: 1px solid #cbd7d6;
+      border-radius: 6px;
+      background: white;
+      padding: 8px 10px;
+      color: var(--ink);
+      resize: vertical;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     input[type="number"],
+    input[type="text"],
     select {
       width: 100%;
       min-height: 40px;
@@ -472,6 +544,15 @@
             <summary>基础身份与硬门槛</summary>
             <div class="fields">
               <div class="grid-2">
+                <label>申请人姓名 / 编号
+                  <input id="applicantName" type="text" placeholder="例如：张三 / Case-001">
+                </label>
+                <label>记录备注
+                  <input id="caseTag" type="text" placeholder="例如：客户A-初筛">
+                </label>
+              </div>
+              <input id="recordId" type="hidden">
+              <div class="grid-2">
                 <label>年龄
                   <input id="age" type="number" min="0" max="100" value="35">
                 </label>
@@ -503,6 +584,15 @@
                   <option value="doctor">博士</option>
                 </select>
               </label>
+              <div class="match-box">
+                <label>学校搜索 / 模糊匹配
+                  <input id="schoolQuery" type="text" placeholder="输入清华、Tsinghua、港大、HKU、UCLA、牛津等">
+                </label>
+                <input id="selectedSchool" type="hidden">
+                <input id="selectedSchoolCountry" type="hidden">
+                <div id="schoolMatches" class="match-list"></div>
+                <p class="material">命中后只自动确认“学校在合资格清单内”；仍需人工核验证书由清单内大学正式授予，且不属于继续教育学院、分校或附属学院等不被接纳来源。</p>
+              </div>
               <div class="official">优才官方条件：申请人是否持有由合资格大学授予的硕士或博士学位；以及该硕士或博士学位是否与 STEM 学科相关。</div>
               <label class="check"><input id="qmasEligibleMasterDoctor" type="checkbox"><span>优才：硕士/博士学位来自合资格大学</span></label>
               <label class="check subcheck"><input id="qmasUniOnList" type="checkbox"><span>二级核验：授予学位的大学在优才合资格大学清单内</span></label>
@@ -587,6 +677,20 @@
               <label class="check"><input id="talentList" type="checkbox"><span>岗位属于香港人才清单短缺专业</span></label>
             </div>
           </details>
+
+          <details open>
+            <summary>保存与历史记录</summary>
+            <div class="fields">
+              <label>备注详情
+                <textarea id="caseNote" placeholder="可记录客户材料状态、待补文件、沟通备注"></textarea>
+              </label>
+              <div class="actions">
+                <button class="btn" id="saveRecordBtn" type="button">保存当前记录</button>
+                <button class="btn secondary" id="exportRecordsBtn" type="button">导出JSON</button>
+              </div>
+              <div id="recordList" class="match-list"></div>
+            </div>
+          </details>
         </form>
       </aside>
 
@@ -607,6 +711,7 @@
           </div>
           <div class="source-list">
             <a href="https://www.immd.gov.hk/eng/faq/QMAS.html" target="_blank" rel="noreferrer">优才 QMAS：前置条件、12项综合计分、6/12门槛、成就计分</a>
+            <a href="https://www.hkengage.gov.hk/en/how-to-apply-for-a-visa/admission-scheme-matching-tool-institutions/" target="_blank" rel="noreferrer">合资格大学综合名单：2026年1月1日起生效，共200所</a>
             <a href="https://www.immd.gov.hk/eng/faq/TTPS.html" target="_blank" rel="noreferrer">高才 TTPS：A/B/C 类、250万收入、合资格大学、C类配额</a>
             <a href="https://www.immd.gov.hk/eng/services/visas/GEP.html" target="_blank" rel="noreferrer">专才 GEP：非内地居民就业入境条件</a>
             <a href="https://www.immd.gov.hk/eng/services/visas/ASMTP.html" target="_blank" rel="noreferrer">内地专才 ASMTP：内地居民就业入境条件</a>
@@ -627,9 +732,257 @@
       info: "资料待补充"
     };
 
+    const universityDataRaw = `Universidad de Buenos Aires (UBA)|Argentina
+Adelaide University*|Australia
+Australian National University|Australia
+Monash University|Australia
+The University of Queensland|Australia
+The University of Western Australia|Australia
+University of Adelaide|Australia
+University of Melbourne|Australia
+University of New South Wales|Australia
+University of Sydney|Australia
+University of Technology Sydney|Australia
+University of Vienna*|Austria
+Ghent University|Belgium
+KU Leuven|Belgium
+University of São Paulo|Brazil
+McGill University|Canada
+McMaster University|Canada
+University of Alberta|Canada
+University of British Columbia|Canada
+University of Montreal|Canada
+University of Toronto|Canada
+Pontificia Universidad Católica de Chile|Chile
+Beihang University|Chinese Mainland
+Beijing Institute of Technology|Chinese Mainland
+Beijing Normal University|Chinese Mainland
+Central South University|Chinese Mainland
+Fudan University|Chinese Mainland
+Harbin Institute of Technology|Chinese Mainland
+Huazhong University of Science and Technology|Chinese Mainland
+Nanjing University|Chinese Mainland
+Nankai University|Chinese Mainland
+Peking University|Chinese Mainland
+Renmin University of China|Chinese Mainland
+Shanghai Jiao Tong University|Chinese Mainland
+Sichuan University|Chinese Mainland
+Southeast University|Chinese Mainland
+Sun Yat-sen University|Chinese Mainland
+Tianjin University|Chinese Mainland
+Tongji University|Chinese Mainland
+Tsinghua University|Chinese Mainland
+University of Chinese Academy of Sciences|Chinese Mainland
+University of Science and Technology of China|Chinese Mainland
+Wuhan University|Chinese Mainland
+Xi&#039;an Jiaotong University|Chinese Mainland
+Zhejiang University|Chinese Mainland
+Aarhus University|Denmark
+Technical University of Denmark|Denmark
+University of Copenhagen|Denmark
+University of Helsinki|Finland
+Institut Polytechnique de Paris|France
+Sorbonne University|France
+Université Paris Cité (formerly Université de Paris)|France
+Université Paris-Saclay|France
+Université PSL|France
+Charité - Universitätsmedizin Berlin|Germany
+Freie Universität Berlin|Germany
+Heidelberg University|Germany
+Humboldt-Universität zu Berlin|Germany
+Karlsruhe Institute of Technology (KIT)*|Germany
+Ludwig-Maximilians-Universität München|Germany
+RWTH Aachen University|Germany
+Technical University of Munich|Germany
+University of Bonn|Germany
+University of Tübingen|Germany
+City University of Hong Kong|Hong Kong SAR
+The Chinese University of Hong Kong|Hong Kong SAR
+The Hong Kong Polytechnic University|Hong Kong SAR
+The Hong Kong University of Science and Technology|Hong Kong SAR
+The University of Hong Kong|Hong Kong SAR
+Trinity College Dublin, The University of Dublin|Ireland
+Technion-Israel Institute of Technology|Israel
+The Hebrew University of Jerusalem|Israel
+Weizmann Institute of Science|Israel
+Politecnico di Milano*|Italy
+Kyoto University|Japan
+Nagoya University|Japan
+Osaka University|Japan
+The University of Tokyo|Japan
+Tohoku University|Japan
+Tokyo Institute of Technology (Tokyo Tech)|Japan
+Universiti Malaya (UM)|Malaysia
+Universidad Nacional Autónoma de México (UNAM)|Mexico
+Delft University of Technology|Netherlands
+Erasmus University Rotterdam|Netherlands
+Hotelschool The Hague|Netherlands
+Leiden University|Netherlands
+University of Amsterdam|Netherlands
+University of Groningen|Netherlands
+Utrecht University|Netherlands
+Vrije Universiteit Amsterdam|Netherlands
+Wageningen University & Research|Netherlands
+The University of Auckland|New Zealand
+University of Oslo|Norway
+Lomonosov Moscow State University|Russia
+King Abdulaziz University|Saudi Arabia
+King Abdullah University of Science and Technology|Saudi Arabia
+King Fahd University of Petroleum & Minerals*|Saudi Arabia
+King Saud University|Saudi Arabia
+Nanyang Technological University, Singapore|Singapore
+National University of Singapore|Singapore
+Korea Advanced Institute of Science and Technology (KAIST)|South Korea
+Korea University|South Korea
+Pohang University of Science And Technology (POSTECH)|South Korea
+Seoul National University|South Korea
+Sungkyunkwan University (SKKU)|South Korea
+Yonsei University|South Korea
+University of Barcelona|Spain
+Karolinska Institute|Sweden
+KTH Royal Institute of Technology|Sweden
+Lund University|Sweden
+Stockholm University|Sweden
+Uppsala University|Sweden
+Cesar Ritz Colleges Switzerland|Switzerland
+EHL Hospitality Business School|Switzerland
+ETH Zurich - Swiss Federal Institute of Technology|Switzerland
+Glion Institute of Higher Education|Switzerland
+Les Roches Global Hospitality Management Education|Switzerland
+Swiss Hotel Management School|Switzerland
+University of Basel|Switzerland
+University of Bern|Switzerland
+University of Geneva|Switzerland
+University of Zurich|Switzerland
+École Polytechnique Fédérale de Lausanne|Switzerland
+National Taiwan University (NTU)|Taiwan
+Durham University|U.K.
+Imperial College London|U.K.
+King&#039;s College London|U.K.
+London School of Economics and Political Science|U.K.
+Queen Mary University of London|U.K.
+Royal College of Art|U.K.
+The University of Sheffield|U.K.
+University College London|U.K.
+University of Birmingham|U.K.
+University of Bristol|U.K.
+University of Cambridge|U.K.
+University of Edinburgh|U.K.
+University of Glasgow|U.K.
+University of Leeds|U.K.
+University of Manchester|U.K.
+University of Nottingham|U.K.
+University of Oxford|U.K.
+University of Southampton|U.K.
+University of St Andrews|U.K.
+University of the Arts London|U.K.
+University of Warwick|U.K.
+Boston University|U.S.A.
+Brown University|U.S.A.
+California Institute of Technology|U.S.A.
+Carnegie Mellon University|U.S.A.
+Columbia University|U.S.A.
+Cornell University|U.S.A.
+Dartmouth College|U.S.A.
+Duke University|U.S.A.
+Emory University|U.S.A.
+Georgia Institute of Technology|U.S.A.
+Harvard University|U.S.A.
+Icahn School of Medicine at Mount Sinai|U.S.A.
+Johns Hopkins University|U.S.A.
+Massachusetts Institute of Technology|U.S.A.
+Michigan State University|U.S.A.
+New York University|U.S.A.
+Northwestern University|U.S.A.
+Ohio State University--Columbus|U.S.A.
+Parsons School of Design, the New School|U.S.A.
+Pennsylvania State University|U.S.A.
+Princeton University|U.S.A.
+Purdue University - West Lafayette|U.S.A.
+Rhode Island School of Design|U.S.A.
+Rice University|U.S.A.
+Rockefeller University|U.S.A.
+Stanford University|U.S.A.
+The University of Chicago|U.S.A.
+The University of Texas M. D. Anderson Cancer Center|U.S.A.
+The University of Texas Southwestern Medical Center at Dallas|U.S.A.
+University of Arizona|U.S.A.
+University of California, Berkeley|U.S.A.
+University of California, Davis|U.S.A.
+University of California, Irvine|U.S.A.
+University of California, Los Angeles|U.S.A.
+University of California, San Diego|U.S.A.
+University of California, San Francisco|U.S.A.
+University of California, Santa Barbara|U.S.A.
+University of California, Santa Cruz|U.S.A.
+University of Colorado--Boulder|U.S.A.
+University of Florida|U.S.A.
+University of Illinois at Urbana-Champaign|U.S.A.
+University of Maryland, College Park|U.S.A.
+University of Massachusetts|U.S.A.
+University of Michigan-Ann Arbor|U.S.A.
+University of Minnesota--Twin Cities|U.S.A.
+University of North Carolina--Chapel Hill|U.S.A.
+University of Pennsylvania|U.S.A.
+University of Pittsburgh|U.S.A.
+University of Southern California|U.S.A.
+University of Texas at Austin|U.S.A.
+University of Washington|U.S.A.
+University of Wisconsin-Madison|U.S.A.
+Vanderbilt University|U.S.A.
+Washington University in St. Louis|U.S.A.
+Yale University|U.S.A.`;
+
+    const universityAliases = {
+      "Tsinghua University": "清华 清華 清华大学 清華大學 th u",
+      "Peking University": "北大 北京大学 北京大學 pku",
+      "Fudan University": "复旦 復旦 复旦大学 復旦大學",
+      "Zhejiang University": "浙大 浙江大学 浙江大學 zju",
+      "Shanghai Jiao Tong University": "上海交大 上海交通 上海交通大学 上海交通大學 sjtu",
+      "University of Science and Technology of China": "中科大 中国科学技术大学 中國科學技術大學 ustc",
+      "Sun Yat-sen University": "中山大学 中山大學 sysu",
+      "Nanjing University": "南京大学 南京大學 南大 nju",
+      "Huazhong University of Science and Technology": "华中科技大学 華中科技大學 华科 華科 hust",
+      "Wuhan University": "武汉大学 武漢大學 武大 whu",
+      "Xi'an Jiaotong University": "西安交通大学 西安交通大學 西交 xjtu",
+      "Harbin Institute of Technology": "哈尔滨工业大学 哈爾濱工業大學 哈工大 hit",
+      "Central South University": "中南大学 中南大學 csu",
+      "Sichuan University": "四川大学 四川大學 川大 scu",
+      "Beihang University": "北京航空航天大学 北京航空航天大學 北航 buaa",
+      "Southeast University": "东南大学 東南大學 seu",
+      "Beijing Institute of Technology": "北京理工大学 北京理工大學 北理 bit",
+      "Tongji University": "同济大学 同濟大學",
+      "Renmin University of China": "中国人民大学 中國人民大學 人大 ruc",
+      "Beijing Normal University": "北京师范大学 北京師範大學 北师大 bnu",
+      "Nankai University": "南开大学 南開大學",
+      "Tianjin University": "天津大学 天津大學 天大",
+      "University of Chinese Academy of Sciences": "中国科学院大学 中國科學院大學 国科大 國科大 ucas",
+      "The University of Hong Kong": "香港大学 香港大學 港大 hku",
+      "The Chinese University of Hong Kong": "香港中文大学 香港中文大學 港中文 中大 cuhk",
+      "The Hong Kong University of Science and Technology": "香港科技大学 香港科技大學 港科大 hkust",
+      "City University of Hong Kong": "香港城市大学 香港城市大學 城大 cityu",
+      "The Hong Kong Polytechnic University": "香港理工大学 香港理工大學 理大 polyu",
+      "National Taiwan University (NTU)": "国立台湾大学 國立台灣大學 台大 ntu",
+      "Massachusetts Institute of Technology": "mit 麻省理工",
+      "California Institute of Technology": "caltech 加州理工",
+      "University of California, Berkeley": "uc berkeley ucb 伯克利 加州大学伯克利",
+      "University of California, Los Angeles": "ucla 加州大学洛杉矶 加州大學洛杉磯",
+      "University of California, San Diego": "ucsd 加州大学圣地亚哥",
+      "New York University": "nyu 纽约大学 紐約大學",
+      "Carnegie Mellon University": "cmu 卡内基梅隆 卡內基梅隆",
+      "University of Illinois at Urbana-Champaign": "uiuc 伊利诺伊香槟 伊利諾伊香檳",
+      "University of Oxford": "oxford 牛津 牛津大学 牛津大學",
+      "University of Cambridge": "cambridge 剑桥 劍橋 剑桥大学 劍橋大學",
+      "Imperial College London": "imperial icl 帝国理工 帝國理工",
+      "University College London": "ucl 伦敦大学学院 倫敦大學學院",
+      "London School of Economics and Political Science": "lse 伦敦政经 倫敦政經",
+      "King's College London": "kcl 伦敦国王学院 倫敦國王學院"
+    };
+
     const fields = [
-      "age", "identity", "financial", "goodCharacter", "validTravel", "notBurden",
+      "applicantName", "caseTag", "recordId", "age", "identity", "financial", "goodCharacter", "validTravel", "notBurden",
       "education", "qmasEligibleMasterDoctor", "stemMasterDoctor", "ttpsEligibleBachelor",
+      "schoolQuery", "selectedSchool", "selectedSchoolCountry",
       "qmasUniOnList", "qmasAwardingInstitution", "qmasNotExtensionSchool", "qmasJointAllEligible",
       "ttpsUniOnList", "ttpsAwardingInstitution", "ttpsNotExtensionSchool", "ttpsJointAllEligible",
       "graduatedPast5", "hkNonLocalUndergrad", "workPast5",
@@ -637,7 +990,7 @@
       "targetIndustry", "annualIncome", "hkOfferSalary", "businessProfit",
       "privateOwnership", "listedOwnership", "majorAward", "peerRecognition",
       "hkOffer", "genuineVacancy", "jobRelevant", "localShortage", "marketPackage",
-      "talentList"
+      "talentList", "caseNote"
     ];
 
     const get = () => {
@@ -658,6 +1011,205 @@
     const ttpsEligibleUniversityReady = (d) => d.ttpsEligibleBachelor && d.ttpsUniOnList && d.ttpsAwardingInstitution && d.ttpsNotExtensionSchool;
     const missing = (items) => items.filter((item) => !item.pass).map((item) => item.label);
     const passed = (items) => items.filter((item) => item.pass).map((item) => item.label);
+    const storageKey = "hkTalentVisaChecker.records.v1";
+    let memoryRecords = [];
+
+    function parseUniversityData(raw) {
+      return raw.trim().split("\n").map((line) => {
+        const [name, country] = line.split("|");
+        const aliases = universityAliases[name] || "";
+        return { name, country, aliases, searchText: normalizeText(`${name} ${country} ${aliases}`) };
+      });
+    }
+
+    const eligibleUniversities = parseUniversityData(universityDataRaw);
+
+    function normalizeText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s.,'’`&()\-–—:]+/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function levenshtein(a, b) {
+      if (!a || !b) return Math.max(a.length, b.length);
+      const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let prev = row[0];
+        row[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const temp = row[j];
+          row[j] = Math.min(
+            row[j] + 1,
+            row[j - 1] + 1,
+            prev + (a[i - 1] === b[j - 1] ? 0 : 1)
+          );
+          prev = temp;
+        }
+      }
+      return row[b.length];
+    }
+
+    function scoreUniversity(query, university) {
+      const q = normalizeText(query);
+      if (!q) return 0;
+      if (university.searchText.includes(q)) return 100 - Math.min(q.length, 40);
+      const name = normalizeText(university.name);
+      const tokens = university.searchText.match(/[a-z0-9\u4e00-\u9fff]+/g) || [];
+      const bestTokenDistance = Math.min(...tokens.map((token) => levenshtein(q, token.slice(0, Math.max(q.length, token.length)))));
+      const nameDistance = levenshtein(q, name.slice(0, Math.max(q.length, Math.min(name.length, q.length + 8))));
+      const best = Math.min(bestTokenDistance, nameDistance);
+      return best <= Math.max(2, Math.floor(q.length * 0.28)) ? 70 - best : 0;
+    }
+
+    function findUniversityMatches(query) {
+      return eligibleUniversities
+        .map((university) => ({ ...university, score: scoreUniversity(query, university) }))
+        .filter((university) => university.score > 0)
+        .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+        .slice(0, 8);
+    }
+
+    function renderSchoolMatches() {
+      const query = $("schoolQuery").value.trim();
+      const box = $("schoolMatches");
+      if (!query) {
+        box.innerHTML = `<p class="empty">输入学校名后显示匹配结果。</p>`;
+        return;
+      }
+      const matches = findUniversityMatches(query);
+      if (!matches.length) {
+        box.innerHTML = `<p class="empty">未命中官方合资格大学清单。可尝试英文全称、简称或中文名。</p>`;
+        return;
+      }
+      box.innerHTML = matches.map((item, index) => `
+        <div class="match-item">
+          <div>
+            <div class="match-name">${escapeHtml(item.name)}</div>
+            <div class="match-meta">${escapeHtml(item.country)} · 匹配度 ${item.score}</div>
+          </div>
+          <button type="button" data-school-index="${index}">选用</button>
+        </div>
+      `).join("");
+      box.querySelectorAll("[data-school-index]").forEach((button) => {
+        button.addEventListener("click", () => selectSchool(matches[Number(button.dataset.schoolIndex)]));
+      });
+    }
+
+    function selectSchool(university) {
+      $("schoolQuery").value = university.name;
+      $("selectedSchool").value = university.name;
+      $("selectedSchoolCountry").value = university.country;
+      if (hasMasterOrDoctor(get())) {
+        setValue("qmasEligibleMasterDoctor", true);
+        setValue("qmasUniOnList", true);
+      }
+      if (hasBachelorOrAbove(get())) {
+        setValue("ttpsEligibleBachelor", true);
+        setValue("ttpsUniOnList", true);
+      }
+      renderSchoolMatches();
+      render();
+    }
+
+    function readRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "[]");
+      } catch {
+        return memoryRecords;
+      }
+    }
+
+    function writeRecords(records) {
+      memoryRecords = records;
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(records));
+      } catch {
+        memoryRecords = records;
+      }
+    }
+
+    function saveCurrentRecord() {
+      const data = get();
+      const records = readRecords();
+      const existingId = data.recordId || "";
+      const now = new Date().toISOString();
+      data.recordId = existingId || `case-${Date.now()}`;
+      const record = {
+        id: data.recordId,
+        savedAt: now,
+        name: data.applicantName || data.caseTag || "未命名申请人",
+        data
+      };
+      const next = existingId
+        ? records.map((item) => item.id === existingId ? record : item)
+        : [record, ...records];
+      writeRecords(next.slice(0, 50));
+      renderRecords();
+    }
+
+    function loadRecord(id) {
+      const record = readRecords().find((item) => item.id === id);
+      if (!record) return;
+      Object.entries(record.data).forEach(([field, value]) => {
+        if ($(field)) setValue(field, value);
+      });
+      setValue("recordId", record.id);
+      renderSchoolMatches();
+      render();
+    }
+
+    function deleteRecord(id) {
+      writeRecords(readRecords().filter((item) => item.id !== id));
+      renderRecords();
+    }
+
+    function exportRecords() {
+      const blob = new Blob([JSON.stringify(readRecords(), null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `hk-talent-records-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderRecords() {
+      const box = $("recordList");
+      const records = readRecords();
+      if (!records.length) {
+        box.innerHTML = `<p class="empty">暂无保存记录。</p>`;
+        return;
+      }
+      box.innerHTML = records.map((record) => `
+        <div class="record-item">
+          <div>
+            <div class="record-name">${escapeHtml(record.name)}</div>
+            <div class="record-meta">${escapeHtml(record.data.selectedSchool || "未选学校")} · ${new Date(record.savedAt).toLocaleString()}</div>
+          </div>
+          <div class="record-actions">
+            <button type="button" data-load-record="${record.id}">载入</button>
+            <button type="button" data-delete-record="${record.id}">删除</button>
+          </div>
+        </div>
+      `).join("");
+      box.querySelectorAll("[data-load-record]").forEach((button) => {
+        button.addEventListener("click", () => loadRecord(button.dataset.loadRecord));
+      });
+      box.querySelectorAll("[data-delete-record]").forEach((button) => {
+        button.addEventListener("click", () => deleteRecord(button.dataset.deleteRecord));
+      });
+    }
 
     function evaluateQmas(d) {
       const must = [
@@ -871,19 +1423,36 @@
 
     $("profileForm").addEventListener("input", render);
     $("profileForm").addEventListener("change", render);
+    $("schoolQuery").addEventListener("input", () => {
+      setValue("selectedSchool", "");
+      setValue("selectedSchoolCountry", "");
+      renderSchoolMatches();
+    });
+    $("saveRecordBtn").addEventListener("click", saveCurrentRecord);
+    $("exportRecordsBtn").addEventListener("click", exportRecords);
     $("resetBtn").addEventListener("click", () => {
       $("profileForm").reset();
+      setValue("recordId", "");
+      setValue("selectedSchool", "");
+      setValue("selectedSchoolCountry", "");
+      renderSchoolMatches();
       render();
     });
     $("sampleBtn").addEventListener("click", () => {
       const sample = {
         age: 34,
+        applicantName: "样例申请人",
+        caseTag: "优才+高才B",
+        recordId: "",
         identity: "mainland",
         financial: true,
         goodCharacter: true,
         validTravel: true,
         notBurden: true,
         education: "master",
+        schoolQuery: "Tsinghua University",
+        selectedSchool: "Tsinghua University",
+        selectedSchoolCountry: "Chinese Mainland",
         qmasEligibleMasterDoctor: true,
         qmasUniOnList: true,
         qmasAwardingInstitution: true,
@@ -916,12 +1485,16 @@
         jobRelevant: true,
         localShortage: false,
         marketPackage: true,
-        talentList: true
+        talentList: true,
+        caseNote: "样例：学校已命中官方清单；仍需核验证书授予机构和材料。"
       };
       Object.entries(sample).forEach(([id, value]) => setValue(id, value));
+      renderSchoolMatches();
       render();
     });
 
+    renderSchoolMatches();
+    renderRecords();
     render();
   </script>
 </body>
