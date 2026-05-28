@@ -686,8 +686,12 @@
               </label>
               <div class="actions">
                 <button class="btn" id="saveRecordBtn" type="button">保存当前记录</button>
-                <button class="btn secondary" id="exportRecordsBtn" type="button">导出JSON</button>
+                <button class="btn secondary" id="downloadCurrentBtn" type="button">下载当前JSON</button>
+                <button class="btn secondary" id="copySummaryBtn" type="button">复制摘要</button>
+                <button class="btn secondary" id="exportRecordsBtn" type="button">导出全部JSON</button>
+                <button class="btn secondary" id="exportCsvBtn" type="button">导出全部CSV</button>
               </div>
+              <p class="material" id="saveStatus">保存后可下载当前记录发给顾问；浏览器本地历史只保存在当前设备。</p>
               <div id="recordList" class="match-list"></div>
             </div>
           </details>
@@ -1156,6 +1160,8 @@ Yale University|U.S.A.`;
         : [record, ...records];
       writeRecords(next.slice(0, 50));
       renderRecords();
+      $("saveStatus").textContent = `已保存：${record.name} · ${new Date(record.savedAt).toLocaleString()}。可点击“下载当前JSON”发给顾问。`;
+      return record;
     }
 
     function loadRecord(id) {
@@ -1174,14 +1180,107 @@ Yale University|U.S.A.`;
       renderRecords();
     }
 
-    function exportRecords() {
-      const blob = new Blob([JSON.stringify(readRecords(), null, 2)], { type: "application/json" });
+    function downloadBlob(filename, content, type) {
+      const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `hk-talent-records-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = filename;
       link.click();
       URL.revokeObjectURL(url);
+    }
+
+    function safeFilename(value) {
+      return normalizeText(value).slice(0, 40) || "case";
+    }
+
+    function currentRecordPayload() {
+      const data = get();
+      return {
+        id: data.recordId || `case-${Date.now()}`,
+        exportedAt: new Date().toISOString(),
+        name: data.applicantName || data.caseTag || "未命名申请人",
+        data,
+        result: {
+          qmas: evaluateQmas(data),
+          ttps: evaluateTtps(data),
+          employment: evaluateEmployment(data)
+        }
+      };
+    }
+
+    function downloadCurrentRecord() {
+      const payload = currentRecordPayload();
+      downloadBlob(
+        `hk-talent-${safeFilename(payload.name)}-${new Date().toISOString().slice(0, 10)}.json`,
+        JSON.stringify(payload, null, 2),
+        "application/json"
+      );
+      $("saveStatus").textContent = `已下载当前记录：${payload.name}`;
+    }
+
+    function exportRecords() {
+      downloadBlob(
+        `hk-talent-records-${new Date().toISOString().slice(0, 10)}.json`,
+        JSON.stringify(readRecords(), null, 2),
+        "application/json"
+      );
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function exportRecordsCsv() {
+      const rows = readRecords().map((record) => {
+        const data = record.data || {};
+        const qmas = evaluateQmas(data);
+        const ttps = evaluateTtps(data);
+        const employment = evaluateEmployment(data);
+        return [
+          record.name,
+          record.savedAt,
+          data.selectedSchool,
+          data.age,
+          data.identity,
+          qmas.score + "/12",
+          qmas.mustPassCount + "/4",
+          ttps.best,
+          employment.best,
+          data.caseTag,
+          data.caseNote
+        ];
+      });
+      const header = ["姓名/编号", "保存时间", "学校", "年龄", "身份", "优才分", "优才Must", "高才", "专才", "标签", "备注"];
+      const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+      downloadBlob(`hk-talent-records-${new Date().toISOString().slice(0, 10)}.csv`, "\ufeff" + csv, "text/csv;charset=utf-8");
+    }
+
+    function makeCurrentSummary() {
+      const data = get();
+      const qmas = evaluateQmas(data);
+      const ttps = evaluateTtps(data);
+      const employment = evaluateEmployment(data);
+      return [
+        `申请人：${data.applicantName || data.caseTag || "未命名"}`,
+        `学校：${data.selectedSchool || data.schoolQuery || "未填写"}`,
+        `年龄：${data.age}`,
+        `身份：${data.identity}`,
+        `优才：${qmas.score}/12，Must ${qmas.mustPassCount}/4，${qmas.badge}`,
+        `高才：${ttps.best}`,
+        `专才：${employment.best}`,
+        `备注：${data.caseNote || "-"}`
+      ].join("\n");
+    }
+
+    async function copyCurrentSummary() {
+      const summary = makeCurrentSummary();
+      try {
+        await navigator.clipboard.writeText(summary);
+        $("saveStatus").textContent = "已复制当前记录摘要。";
+      } catch {
+        $("saveStatus").textContent = summary;
+      }
     }
 
     function renderRecords() {
@@ -1429,7 +1528,10 @@ Yale University|U.S.A.`;
       renderSchoolMatches();
     });
     $("saveRecordBtn").addEventListener("click", saveCurrentRecord);
+    $("downloadCurrentBtn").addEventListener("click", downloadCurrentRecord);
+    $("copySummaryBtn").addEventListener("click", copyCurrentSummary);
     $("exportRecordsBtn").addEventListener("click", exportRecords);
+    $("exportCsvBtn").addEventListener("click", exportRecordsCsv);
     $("resetBtn").addEventListener("click", () => {
       $("profileForm").reset();
       setValue("recordId", "");
