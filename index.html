@@ -214,6 +214,30 @@
       flex: 0 0 auto;
     }
 
+    .official {
+      border-left: 4px solid var(--teal);
+      background: #f2f8f6;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--teal-dark);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .subcheck {
+      margin-left: 28px;
+      border-style: dashed;
+      background: #ffffff;
+    }
+
+    .material {
+      margin-left: 28px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 0 2px;
+    }
+
     input[type="number"],
     select {
       width: 100%;
@@ -479,12 +503,24 @@
                   <option value="doctor">博士</option>
                 </select>
               </label>
-              <label class="check"><input id="qmasEligibleMasterDoctor" type="checkbox"><span>硕士/博士由优才合资格大学授予</span></label>
-              <label class="check"><input id="stemMasterDoctor" type="checkbox"><span>上述硕士/博士与 STEM 相关</span></label>
-              <label class="check"><input id="ttpsEligibleBachelor" type="checkbox"><span>本科或以上学历来自高才合资格大学</span></label>
-              <label class="check"><input id="notExtensionSchool" type="checkbox" checked><span>学历不是继续教育学院、分校、附属学院等不被接纳来源</span></label>
-              <label class="check"><input id="graduatedPast5" type="checkbox"><span>该合资格大学学位在申请前5年内取得</span></label>
-              <label class="check"><input id="hkNonLocalUndergrad" type="checkbox"><span>该本科为香港本地全日制认可课程的非本地学生本科，且可走 IANG</span></label>
+              <div class="official">优才官方条件：申请人是否持有由合资格大学授予的硕士或博士学位；以及该硕士或博士学位是否与 STEM 学科相关。</div>
+              <label class="check"><input id="qmasEligibleMasterDoctor" type="checkbox"><span>优才：硕士/博士学位来自合资格大学</span></label>
+              <label class="check subcheck"><input id="qmasUniOnList" type="checkbox"><span>二级核验：授予学位的大学在优才合资格大学清单内</span></label>
+              <label class="check subcheck"><input id="qmasAwardingInstitution" type="checkbox"><span>二级核验：学位由清单内大学正式授予，不只是合作办学/附属机构出具</span></label>
+              <label class="check subcheck"><input id="qmasNotExtensionSchool" type="checkbox" checked><span>二级核验：不属于继续教育学院、分校、附属学院等不被接纳来源</span></label>
+              <label class="check subcheck"><input id="qmasJointAllEligible" type="checkbox"><span>二级核验：如属联合学位，所有授予院校均已核验合资格</span></label>
+              <label class="check"><input id="stemMasterDoctor" type="checkbox"><span>优才：上述硕士/博士与 STEM 学科相关</span></label>
+              <p class="material">材料：学位证/毕业证、成绩单、院校清单截图或编号、授予院校名称、联合学位授予说明、STEM专业证明。</p>
+
+              <div class="official">高才官方条件：B/C类要求申请人持有合资格大学颁授的学士学位；B类另需近5年内累计不少于3年工作经验，C类为近5年毕业且工作经验少于3年，并受配额及IANG排除限制。</div>
+              <label class="check"><input id="ttpsEligibleBachelor" type="checkbox"><span>高才：本科或以上学历来自合资格大学</span></label>
+              <label class="check subcheck"><input id="ttpsUniOnList" type="checkbox"><span>二级核验：授予本科/以上学位的大学在高才合资格大学清单内</span></label>
+              <label class="check subcheck"><input id="ttpsAwardingInstitution" type="checkbox"><span>二级核验：学位由清单内大学正式颁授</span></label>
+              <label class="check subcheck"><input id="ttpsNotExtensionSchool" type="checkbox" checked><span>二级核验：不属于继续教育学院、分校、附属学院等不被接纳来源</span></label>
+              <label class="check subcheck"><input id="ttpsJointAllEligible" type="checkbox"><span>二级核验：如属联合学位，所有授予院校均已核验合资格</span></label>
+              <label class="check"><input id="graduatedPast5" type="checkbox"><span>高才C：该合资格大学学位在申请前5年内取得</span></label>
+              <label class="check"><input id="hkNonLocalUndergrad" type="checkbox"><span>高才C排除：该本科为香港本地全日制认可课程的非本地学生本科，且可走 IANG</span></label>
+              <p class="material">材料：学位证/毕业证、成绩单、合资格大学清单核验、授予机构证明、毕业日期、是否IANG适用证明。</p>
             </div>
           </details>
 
@@ -594,7 +630,9 @@
     const fields = [
       "age", "identity", "financial", "goodCharacter", "validTravel", "notBurden",
       "education", "qmasEligibleMasterDoctor", "stemMasterDoctor", "ttpsEligibleBachelor",
-      "notExtensionSchool", "graduatedPast5", "hkNonLocalUndergrad", "workPast5",
+      "qmasUniOnList", "qmasAwardingInstitution", "qmasNotExtensionSchool", "qmasJointAllEligible",
+      "ttpsUniOnList", "ttpsAwardingInstitution", "ttpsNotExtensionSchool", "ttpsJointAllEligible",
+      "graduatedPast5", "hkNonLocalUndergrad", "workPast5",
       "graduateExp", "mncExp", "internationalExp", "twoLanguages", "english",
       "targetIndustry", "annualIncome", "hkOfferSalary", "businessProfit",
       "privateOwnership", "listedOwnership", "majorAward", "peerRecognition",
@@ -616,6 +654,8 @@
     const hasBasicEducation = (d) => ["technical", "bachelor", "master", "doctor"].includes(d.education);
     const hasBachelorOrAbove = (d) => ["bachelor", "master", "doctor"].includes(d.education);
     const hasMasterOrDoctor = (d) => ["master", "doctor"].includes(d.education);
+    const qmasEligibleUniversityReady = (d) => d.qmasEligibleMasterDoctor && d.qmasUniOnList && d.qmasAwardingInstitution && d.qmasNotExtensionSchool;
+    const ttpsEligibleUniversityReady = (d) => d.ttpsEligibleBachelor && d.ttpsUniOnList && d.ttpsAwardingInstitution && d.ttpsNotExtensionSchool;
     const missing = (items) => items.filter((item) => !item.pass).map((item) => item.label);
     const passed = (items) => items.filter((item) => item.pass).map((item) => item.label);
 
@@ -629,8 +669,8 @@
 
       const scoreItems = [
         { label: "年龄50岁或以下", pass: d.age <= 50 && d.age >= 18 },
-        { label: "合资格大学硕士或博士", pass: hasMasterOrDoctor(d) && d.qmasEligibleMasterDoctor && d.notExtensionSchool },
-        { label: "合资格大学硕博且属STEM", pass: hasMasterOrDoctor(d) && d.qmasEligibleMasterDoctor && d.stemMasterDoctor && d.notExtensionSchool },
+        { label: "合资格大学硕士或博士", pass: hasMasterOrDoctor(d) && qmasEligibleUniversityReady(d) },
+        { label: "合资格大学硕博且属STEM", pass: hasMasterOrDoctor(d) && qmasEligibleUniversityReady(d) && d.stemMasterDoctor },
         { label: "两种语言良好书写及口语", pass: d.twoLanguages },
         { label: "英文良好书写及口语", pass: d.english },
         { label: "不少于5年学位或专家级经验", pass: d.graduateExp >= 5 },
@@ -652,7 +692,7 @@
       const next = [];
       if (!mustPass) next.push(...missing(must));
       if (mustPass && score < 6 && !achievementPass) next.push(`综合计分还差 ${6 - score} 项`);
-      if (!d.qmasEligibleMasterDoctor && hasMasterOrDoctor(d)) next.push("核验硕博院校是否在优才合资格大学清单");
+      if (!qmasEligibleUniversityReady(d) && hasMasterOrDoctor(d)) next.push("补齐优才合资格大学二级核验：清单、授予机构、非继续教育/分校");
       if (d.annualIncome >= 1000000) next.push("准备税单、雇主收入证明或股权/期权证明");
       if (d.businessProfit >= 5000000 || d.privateOwnership > 0) next.push("准备企业审计报表、利润证明和持股证明");
 
@@ -677,8 +717,8 @@
 
     function evaluateTtps(d) {
       const categoryA = d.annualIncome >= 2500000;
-      const categoryB = hasBachelorOrAbove(d) && d.ttpsEligibleBachelor && d.notExtensionSchool && d.workPast5 >= 3;
-      const categoryC = hasBachelorOrAbove(d) && d.ttpsEligibleBachelor && d.notExtensionSchool && d.graduatedPast5 && d.workPast5 < 3 && !d.hkNonLocalUndergrad;
+      const categoryB = hasBachelorOrAbove(d) && ttpsEligibleUniversityReady(d) && d.workPast5 >= 3;
+      const categoryC = hasBachelorOrAbove(d) && ttpsEligibleUniversityReady(d) && d.graduatedPast5 && d.workPast5 < 3 && !d.hkNonLocalUndergrad;
       const base = d.validTravel && d.goodCharacter && d.notBurden;
       const matched = [];
       if (base && categoryA) matched.push("A类：前一年年入≥HK$250万");
@@ -697,6 +737,7 @@
       if (!categoryA) miss.push("A类差额：年收入需达HK$250万");
       if (!categoryB) miss.push("B类需合资格大学本科或以上，并有近5年内至少3年工作经验");
       if (!categoryC) miss.push("C类需合资格大学近5年毕业、少于3年经验、且不属香港本地非本地本科IANG情形");
+      if (d.ttpsEligibleBachelor && !ttpsEligibleUniversityReady(d)) miss.push("合资格大学需补二级核验：清单、授予机构、非继续教育/分校");
 
       const next = [];
       if (categoryA) next.push("准备税单、薪金、津贴、期权、自有公司利润证明");
@@ -844,9 +885,16 @@
         notBurden: true,
         education: "master",
         qmasEligibleMasterDoctor: true,
+        qmasUniOnList: true,
+        qmasAwardingInstitution: true,
+        qmasNotExtensionSchool: true,
+        qmasJointAllEligible: false,
         stemMasterDoctor: true,
         ttpsEligibleBachelor: true,
-        notExtensionSchool: true,
+        ttpsUniOnList: true,
+        ttpsAwardingInstitution: true,
+        ttpsNotExtensionSchool: true,
+        ttpsJointAllEligible: false,
         graduatedPast5: false,
         hkNonLocalUndergrad: false,
         workPast5: 4,
