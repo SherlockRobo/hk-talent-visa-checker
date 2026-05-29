@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>香港人才入境初筛客户页</title>
+  <style>
+    :root {
+      --ink: #102329;
+      --muted: #66777d;
+      --line: #d8e2e1;
+      --paper: #f7faf9;
+      --teal: #1d6269;
+      --gold: #b98216;
+      --red: #a33a2c;
+      --green: #247448;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(29, 98, 105, .06) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(29, 98, 105, .05) 1px, transparent 1px),
+        var(--paper);
+      background-size: 30px 30px;
+    }
+    header {
+      padding: 22px 28px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .86);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(420px, 52vw) minmax(360px, 1fr);
+      gap: 16px;
+      padding: 16px;
+      min-height: calc(100vh - 92px);
+    }
+    .pane {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      overflow: hidden;
+      box-shadow: 0 18px 46px rgba(16, 35, 41, .08);
+    }
+    .pane-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #f3f8f6);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .pane-head h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+    .pane-head a {
+      color: var(--teal);
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    .form-frame {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 168px);
+      min-height: 720px;
+      border: 0;
+      background: #fff;
+    }
+    .requirements {
+      height: calc(100vh - 168px);
+      min-height: 720px;
+      overflow: auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      background: white;
+      padding-bottom: 8px;
+      z-index: 1;
+    }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      background: #f7fbfa;
+      color: var(--teal);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 800;
+      font: inherit;
+    }
+    button.active {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: white;
+    }
+    .rule {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--teal);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+    .rule.must, .rule.required { border-left-color: var(--red); }
+    .rule.score { border-left-color: var(--gold); }
+    .rule.check { border-left-color: var(--green); }
+    .rule h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: #edf4f2;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .rule p {
+      margin: 7px 0;
+      color: var(--ink);
+      line-height: 1.62;
+      font-size: 13px;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .fallback {
+      padding: 18px;
+      display: none;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .fallback a {
+      color: var(--teal);
+      font-weight: 800;
+    }
+    @media (max-width: 980px) {
+      header { position: static; padding: 18px; }
+      .shell { grid-template-columns: 1fr; padding: 12px; }
+      .form-frame, .requirements { height: auto; min-height: 680px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>香港优才 / 高才 / 专才初筛</h1>
+    <p class="subtitle">左侧填写客户条件，右侧同步查看三类官方要求与材料口径。提交后记录进入飞书多维表格后台。</p>
+  </header>
+
+  <main class="shell">
+    <section class="pane">
+      <div class="pane-head">
+        <h2>客户填写</h2>
+        <a href="https://my.feishu.cn/share/base/shrcnra78TjubSWw2qhtoezeVtg" target="_blank" rel="noopener">新窗口打开表单</a>
+      </div>
+      <iframe
+        class="form-frame"
+        title="01客户填写表单"
+        src="https://my.feishu.cn/share/base/shrcnra78TjubSWw2qhtoezeVtg"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="fallback">
+        如果左侧表单未显示，请直接打开：
+        <a href="https://my.feishu.cn/share/base/shrcnra78TjubSWw2qhtoezeVtg" target="_blank" rel="noopener">01客户填写表单</a>
+      </div>
+    </section>
+
+    <section class="pane">
+      <div class="pane-head">
+        <h2>官方要求与匹配口径</h2>
+        <a href="https://my.feishu.cn/base/VGJwbw2N7aadQGsG1uIcyLXcnBg?table=tblPRC70YB6P51uy&view=vewWBCmCY7" target="_blank" rel="noopener">打开飞书规则表</a>
+      </div>
+      <div class="requirements">
+        <nav class="tabs" aria-label="类别切换">
+          <button type="button" class="active" data-tab="优才">优才</button>
+          <button type="button" data-tab="高才">高才</button>
+          <button type="button" data-tab="专才">专才</button>
+        </nav>
+        <div id="rules"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const rules = [
+      ["优才", "基础门槛", "Must", "申请优才前必须年满18岁。50岁以上不是直接不合格，只是综合计分中年龄项不得分。", "年龄", "年龄>=18为通过；年龄<=50给年龄加分项。", "核对出生日期、护照或身份证明文件。"],
+      ["优才", "基础门槛", "Must", "申请人需要能负担本人及受养人在港生活，不依赖公共援助。", "可自养", "选择“是”为通过。", "银行流水、资产证明、收入证明或其他财力文件。"],
+      ["优才", "基础门槛", "Must", "申请人不得有犯罪记录或在香港/其他地方的不良入境记录。", "无犯罪/不良记录", "选择“是”为通过。", "无犯罪记录证明、过往签证/入境记录核验。"],
+      ["优才", "基础门槛", "Must", "通常需要认可大学或高等教育机构的第一学位；特殊情况下可用专业资历、专业能力、经验和成就文件支持。", "最高学历", "最高学历不是“无本科/专业能力证明”则通过基础学历门槛。", "学历证书、学位认证、专业资格证明、成就材料。"],
+      ["优才", "综合计分", "Score", "综合计分制现行通过门槛为12项中达到6项；12项覆盖年龄、学历、语言、工作经验、收入、企业所有权。", "优才综合分", "公式汇总12项，>=6显示达标。", "逐项准备证明，分数只是初筛，最终仍由入境处审理。"],
+      ["优才", "学历加分", "Score+二级核验", "硕士或博士由合资格大学授予可计学历项；STEM相关硕博可再计STEM项。", "优才合资格大学硕博; STEM硕博; 学校名称", "学校命中+硕博条件为学历项；STEM为独立项。", "必须核验授予大学在合资格清单、学位正式授予、非继续教育/分校/附属学院；联合学位所有授予院校均需合资格。"],
+      ["高才", "A类", "Required", "申请前一年全年收入达到HKD250万或等值外币，可按高才A类申请。", "申请前一年收入HKD", "收入>=250万显示A类。", "税单、雇主收入证明、期权/企业利润证明；收入口径为应税就业或业务收入。"],
+      ["高才", "B类", "Required+二级核验", "合资格大学学士学位毕业，并在申请前5年内累积至少3年工作经验，可按高才B类申请。", "高才合资格大学本科以上; 近5年工作经验年数; 学校名称", "合资格大学=是且近5年经验>=3显示B类。", "本科必须由合资格大学授予；线上/遥距/夜校/自考/兼读本科不适用B/C；工作经验须毕业后全职或自雇累积。"],
+      ["高才", "C类", "Required+名额", "合资格大学学士学位毕业、毕业不超过5年、少于3年工作经验，并且不符合该本科学位的IANG，可按高才C类；C类有年度配额。", "高才合资格大学本科以上; 近5年毕业; 近5年工作经验年数; IANG排除", "合资格大学=是、近5年毕业=是、经验<3、IANG排除=否时显示C类。", "核验毕业年份、学位授予院校、IANG适用性；C类配额需以提交时系统为准。"],
+      ["高才", "合资格大学", "二级核验", "高才B/C的合资格大学来自劳工及福利局综合清单，包含指定世界排名、酒店、内地、艺术设计等口径。", "学校名称; 高才合资格大学本科以上", "学校模糊匹配只作为初筛，人工确认后勾选合资格大学。", "客户需要提供正式学位证、成绩单、认证证明；联合学位需所有授予院校合资格。"],
+      ["专才", "路径识别", "Required", "非内地身份通常走GEP；中国内地居民且非IANG等路径通常走ASMTP。两者核心就业条件相近。", "身份类型", "身份类型为中国内地居民时输出ASMTP，否则输出GEP。", "核验护照/身份证明、当前逗留身份、是否已有IANG等更适合路径。"],
+      ["专才", "基础条件", "Required", "申请人无安全疑虑和严重犯罪记录，并具备良好教育背景，通常是相关领域第一学位；特殊情况下可用技术资历、专业能力或经验成就支持。", "无犯罪/不良记录; 最高学历", "无犯罪=是且学历/能力满足基础门槛。", "学历、专业证书、履历、成就文件、无犯罪或记录声明。"],
+      ["专才", "雇佣条件", "Required", "需要真实职位空缺、已确认聘用，且岗位与学历或工作经验相关。", "香港Offer; 真实职位空缺; 岗位相关", "三项为“是”才进入专才匹配。", "雇佣合约/聘书、职位说明、组织架构、招聘需求说明。"],
+      ["专才", "本地难替代", "Required", "拟聘岗位不能容易由香港本地劳动力承担；薪酬福利须大致符合香港专业岗位市场水平。", "本地难替代; 薪酬市场水平; 香港岗位年薪HKD", "本地难替代和薪酬市场水平为“是”则通过；年薪高可提示便利措施。", "招聘记录、市场薪酬对比、岗位稀缺性说明、专业资格要求。"],
+      ["专才", "便利措施", "Facilitation", "符合人才清单职位或年薪达到指定高薪口径时，可免除证明本地招聘困难的要求，但不免Offer、岗位真实、相关性和薪酬市场水平等核心条件。", "人才清单岗位; 香港岗位年薪HKD", "人才清单=是或年薪>=200万时提示便利措施。", "核验职位是否属于适用清单/高薪口径，并保留雇佣与薪酬证明。"]
+    ];
+
+    const rulesBox = document.querySelector("#rules");
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function className(kind) {
+      if (kind.includes("Must")) return "must";
+      if (kind.includes("Required")) return "required";
+      if (kind.includes("Score")) return "score";
+      if (kind.includes("核验")) return "check";
+      return "";
+    }
+
+    function renderRules(category) {
+      rulesBox.innerHTML = rules
+        .filter((rule) => rule[0] === category)
+        .map((rule) => `
+          <article class="rule ${className(rule[2])}">
+            <div class="meta">
+              <span class="pill">${rule[0]}</span>
+              <span class="pill">${rule[1]}</span>
+              <span class="pill">${rule[2]}</span>
+            </div>
+            <h3>${rule[3]}</h3>
+            <p><strong>对应输入：</strong>${rule[4]}</p>
+            <p><strong>后台匹配：</strong>${rule[5]}</p>
+            <p class="muted"><strong>材料/二级核验：</strong>${rule[6]}</p>
+          </article>
+        `)
+        .join("");
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((item) => item.classList.toggle("active", item === tab));
+        renderRules(tab.dataset.tab);
+      });
+    });
+
+    renderRules("优才");
+  </script>
+</body>
+</html>
