@@ -3,6 +3,7 @@
 ## 核心链接
 
 - 本地工具：`/Users/bytedance/ObsidianVault_LOCAL/wiki/writing/tools/hk-talent-visa-checker/index.html`
+- 飞书妙搭版：https://dcar.aiforce.cloud/app/app_4k8np5406uua3
 - Vercel 后台版：https://sherlockagent.vercel.app/articles/hk-talent-visa-checker/
 - 线上网页：https://sherlockrobo.github.io/hk-talent-visa-checker/
 - GitHub 仓库：https://github.com/SherlockRobo/hk-talent-visa-checker
@@ -16,6 +17,7 @@
 - 学校模糊匹配：内置官方合资格大学清单 200 所。
 - 记录保存：浏览器本地保存、载入、删除、导出 JSON。
 - 后台提交：Vercel API `/api/hk-talent-submit` 写入私有 GitHub 收件仓库。
+- 飞书妙搭版：国内访问更稳定，页面内“提交给顾问”调用 Vercel 后台 API。
 
 ## 规则口径
 
